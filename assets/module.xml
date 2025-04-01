@@ -1,0 +1,8 @@
+    <module>
+        <components>
+            <component class="k_util.KGraph" />
+            <!-- alternative method for entire package
+            <component package="custom" />
+            -->
+        </components>
+    </module>

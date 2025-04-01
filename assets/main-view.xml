@@ -1,0 +1,27 @@
+<vbox width="100%" style="padding: 5px;" height="100%">
+    <style>
+
+    </style>
+    <hbox id="graphDisaplay" height="5%" width="100%">
+        <k-graph id="daGraph" width="100%"/>
+    </hbox>
+    <hbox width="100%" height="10%">
+        <label text="Introducir datos manualmente"/>
+        <textfield id="rawData" placeholder="1,10,100,..., etc." restrictChars="0-9,." width="100%" />
+    </hbox>
+    <hbox width="100%" height="10%">
+        <button id="loadRaw"     text="Cargar Datos manualmente" width="50%"/>
+        <button id="loadFile"     text="Cargar Datos mediante archivo de texto (.txt)" width="50%"/>
+    </hbox>
+    <hbox id="centralTendency" width="100%" height="20%">
+        <button id="median"     text="Calcular mediana"  width="25%"/>
+        <button id="mean"       text="Calcular Promedio"  width="25%"/>
+        <button id="mode"       text="Calcular Moda"  width="25%"/>
+        <button id="graph"      text="Crear Grafo" width="25%"/>
+    </hbox>
+    <hbox id="centralTendencyDisplay" width="100%" height="10%">
+        <label id="medianDisplay" text="" width="33%"/>
+        <label id="meanDisplay" text="" width="34%"/>
+        <label id="modeDisplay" text="" width="33%"/>
+    </hbox>
+</vbox>
