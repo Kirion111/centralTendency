@@ -3,6 +3,7 @@ package k_util;
 import haxe.ui.containers.dialogs.Dialogs;
 import haxe.ui.containers.dialogs.MessageBox;
 import haxe.ds.Map;
+import k_util.UserStatics;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
@@ -13,6 +14,7 @@ using StringTools;
 class DataUtil{
 
     public static function getData(path:String):Array<String> {
+        UserStatics.userModes = new Map();
         #if sys
         if(!FileSystem.exists(path))
             return [];
@@ -35,18 +37,18 @@ class DataUtil{
     }
 
     public static function mode(numbers:Array<Float>):Array<Float> {
-        var uniqueNums:Map<String, Int> = new Map();
+        UserStatics.userModes = new Map();
         var modes:Array<Float> = [];
         for(num in numbers)
         {
-            if(uniqueNums.exists(""+num))
+            if(UserStatics.userModes.exists(""+num))
             {
-                uniqueNums.set(""+num, uniqueNums.get(""+num)+1);
+                UserStatics.userModes.set(""+num, UserStatics.userModes.get(""+num)+1);
                 continue;
             }
-            uniqueNums.set(""+num, 1);
+            UserStatics.userModes.set(""+num, 1);
         }
-        for(number=>instances in uniqueNums)
+        for(number=>instances in UserStatics.userModes)
         {
             if(modes.length <= 0)
             {
@@ -55,13 +57,13 @@ class DataUtil{
             }
             for(mod in modes)
             {
-                if(instances > uniqueNums.get(""+mod))
+                if(instances > UserStatics.userModes.get(""+mod))
                 {
                     modes = [];
                     modes.push(Std.parseFloat(number));
                     break;
                 }
-                if(instances == uniqueNums.get(""+mod))
+                if(instances == UserStatics.userModes.get(""+mod))
                 {
                     modes.push(Std.parseFloat(number));
                     break;

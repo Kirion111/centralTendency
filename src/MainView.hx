@@ -6,6 +6,7 @@ import haxe.ui.containers.dialogs.Dialogs;
 import haxe.ui.containers.dialogs.MessageBox;
 import haxe.ui.containers.dialogs.OpenFileDialog;
 import haxe.ui.events.MouseEvent;
+import haxe.ui.util.Color;
 import k_util.DataUtil;
 import k_util.KGraph;
 
@@ -30,8 +31,6 @@ class MainView extends VBox {
                     Dialogs.messageBox("Archivo Invalido (Nombre del archivo:" + files[0].name+ ")", "Error", MessageBoxType.TYPE_ERROR, true);
                     return;
                 }
-                //if(DataUtil.getData(files[0].fullPath).contains())
-                //    return;
                 
                 UserStatics.data = [];
                 for(value in DataUtil.getData(files[0].fullPath))
@@ -58,12 +57,11 @@ class MainView extends VBox {
                             return;
                         }
                     }
-    
                     UserStatics.data.push(Std.parseFloat(value));
                 }
-
                 trace(UserStatics.data);
             }
+            resetDisplay();
         }
         loadRaw.onClick = function(e){
             if(rawData.text == "" || rawData.text == null)
@@ -81,6 +79,7 @@ class MainView extends VBox {
             }
 
             trace(UserStatics.data);
+            resetDisplay();
         }
         median.onClick = function (e){
             if(DataUtil.checkData())
@@ -104,8 +103,28 @@ class MainView extends VBox {
             modeDisplay.htmlText = txt + dspl;
         }
         graph.onClick = function (e) {
+            if(DataUtil.checkData())
+                return;
+
+            for(key=>instances in UserStatics.userModes)
+            {
+                var localColor:Color = 0xffffff;
+                localColor.set(Std.int(Math.random()*255), Std.int(Math.random()*255), Std.int(Math.random()*255), 255);
+                UserStatics.userColors.push(localColor);
+            }
+            
             graphDisaplay.percentHeight = 50;
+            daGraph.visible = true;
+            daGraph.show();
         }
         
+    }
+    private function resetDisplay()
+    {
+        medianDisplay.htmlText = "";
+        meanDisplay.htmlText = "";
+        modeDisplay.htmlText = "";
+        graphDisaplay.percentHeight = 5;
+        daGraph.visible = false;
     }
 }
