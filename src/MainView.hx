@@ -1,11 +1,12 @@
 package ;
 
+import haxe.ui.Toolkit;
 import k_util.UserStatics;
 import haxe.ui.containers.VBox;
 import haxe.ui.containers.dialogs.Dialogs;
 import haxe.ui.containers.dialogs.MessageBox;
 import haxe.ui.containers.dialogs.OpenFileDialog;
-import haxe.ui.events.MouseEvent;
+import haxe.ui.components.Label;
 import haxe.ui.util.Color;
 import k_util.DataUtil;
 import k_util.KGraph;
@@ -18,6 +19,8 @@ class MainView extends VBox {
         super();
         loadFile.onClick = function(e)
         {
+            resetDisplay();
+            UserStatics.data = [];
             var helper = new OpenFileDialog();
             helper.show();
             helper.onDialogClosed = function (event) {
@@ -31,8 +34,6 @@ class MainView extends VBox {
                     Dialogs.messageBox("Archivo Invalido (Nombre del archivo:" + files[0].name+ ")", "Error", MessageBoxType.TYPE_ERROR, true);
                     return;
                 }
-                
-                UserStatics.data = [];
                 for(value in DataUtil.getData(files[0].fullPath))
                 {
                     if(value.length > 1)
@@ -59,11 +60,12 @@ class MainView extends VBox {
                     }
                     UserStatics.data.push(Std.parseFloat(value));
                 }
+                daGraph.visible = true;
                 trace(UserStatics.data);
             }
-            resetDisplay();
         }
         loadRaw.onClick = function(e){
+            resetDisplay();
             if(rawData.text == "" || rawData.text == null)
             {
                 Dialogs.messageBox("Introduzca datos Validos en la caja de texto", "Error", MessageBoxType.TYPE_ERROR, true);
@@ -77,9 +79,8 @@ class MainView extends VBox {
 
                 UserStatics.data.push(Std.parseFloat(value));
             }
-
+            daGraph.visible = true;
             trace(UserStatics.data);
-            resetDisplay();
         }
         median.onClick = function (e){
             if(DataUtil.checkData())
@@ -102,29 +103,45 @@ class MainView extends VBox {
 
             modeDisplay.htmlText = txt + dspl;
         }
-        graph.onClick = function (e) {
-            if(DataUtil.checkData())
-                return;
-
-            for(key=>instances in UserStatics.userModes)
-            {
-                var localColor:Color = 0xffffff;
-                localColor.set(Std.int(Math.random()*255), Std.int(Math.random()*255), Std.int(Math.random()*255), 255);
-                UserStatics.userColors.push(localColor);
-            }
-            
-            graphDisaplay.percentHeight = 50;
-            daGraph.visible = true;
-            daGraph.show();
+        daGraph.drawCallBack = function()
+        {
+            resetGraphMarks();
+            //trace("called");
         }
         
+    }
+    public function resetGraphMarks()
+    {
+        leftData.removeChildren();
+        rightData.removeChildren();
+        var uCount:Int = 0;
+        for(data in UserStatics.orderedModes)
+        {
+            //final curModeRep = UserStatics.userModes.get(""+UserStatics.orderedModes[UserStatics.orderedModes.indexOf(data)]);
+            var rightTxt = new Label();
+
+            rightTxt.x = (UserStatics.userGrdSz)*(uCount+1) + (UserStatics.userGrdSz*0.5);
+            rightTxt.width = (UserStatics.userGrdSz)*(uCount+1);
+            rightTxt.htmlText = ""+data;
+
+            rightData.addChildAt(rightTxt, uCount);
+            uCount++;
+        }
+        for(i in 0...Std.int(daGraph.height/UserStatics.userGrdSz)+1)
+        {
+            var leftTxt = new Label();
+            leftTxt.y = daGraph.height-((UserStatics.userGrdSz)*i);
+            leftTxt.height = UserStatics.userGrdSz*i;
+            leftTxt.htmlText = ""+(i);
+
+            leftData.addChildAt(leftTxt, i);
+        }
     }
     private function resetDisplay()
     {
         medianDisplay.htmlText = "";
         meanDisplay.htmlText = "";
         modeDisplay.htmlText = "";
-        graphDisaplay.percentHeight = 5;
         daGraph.visible = false;
     }
 }

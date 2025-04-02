@@ -1,6 +1,5 @@
 package k_util;
 
-import lime.math.ColorMatrix;
 import haxe.ui.Toolkit;
 import haxe.ui.components.Canvas;
 import haxe.ui.geom.Point;
@@ -10,11 +9,12 @@ import k_util.DataUtil;
 
 //@:build(haxe.ui.ComponentBuilder.build("assets/main-view.xml"))
 class KGraph extends Canvas {
-    private static var grdSize:Float = 20;
+    public var grdSize:Float = 20;
+    public var drawCallBack:Void->Void = function(){};
     private static var offset1:Float = 0;
     public function new() {
         super();
-        this.visible = false;
+        //this.visible = false;
         drawGraph();
     }
     private function drawGraph()
@@ -25,31 +25,62 @@ class KGraph extends Canvas {
             uCount++;
 
         grdSize = get_height()/uCount;
+        UserStatics.userGrdSz = grdSize;
         
         componentGraphics.clear();
-        drawGrid(componentGraphics, this.width, this.height, grdSize);
-        drawData(componentGraphics, grdSize);
+        if(!DataUtil.fastCheckData())
+        {
+            drawGrid(componentGraphics, this.width, this.height, grdSize);
+            drawData(componentGraphics, grdSize);
+            drawCallBack();
+        }
 
         Toolkit.callLater(drawGraph);
     }
     private function drawData(graphics:ComponentGraphics, gridSize:Float) {
-        var size = 2;
+        var size = 1;
         var uCount:Int = 0;
-        #if haxeui_heaps 
-        size = 3;
-        #end
-        for(key=>instances in UserStatics.userModes)
+        for(data in UserStatics.orderedModes)
         {
-            graphics.fillStyle(UserStatics.userColors[uCount], .2);
-            graphics.strokeStyle(UserStatics.userColors[uCount], size);
+            final curModeRep = UserStatics.userModes.get(""+UserStatics.orderedModes[UserStatics.orderedModes.indexOf(data)]);
+            graphics.fillStyle(0x000000, .2);
+            if(DataUtil.mode(UserStatics.data).contains(data))
+                graphics.fillStyle(UserStatics.userColors[0], .2);
+
+            graphics.strokeStyle(0x000000, size);
             graphics.moveTo(uCount*gridSize, get_height());
-            graphics.lineTo(uCount*gridSize, instances*gridSize);
-            graphics.lineTo((uCount+1)*gridSize, instances*gridSize);
+            graphics.lineTo(uCount*gridSize, get_height()-(curModeRep*gridSize));
+            graphics.lineTo((uCount+1)*gridSize, get_height()-(curModeRep*gridSize));
             graphics.lineTo((uCount+1)*gridSize, get_height());
 
-            graphics.rectangle(uCount*gridSize, get_height()-(get_height()-(instances*gridSize)), gridSize, get_height()-(instances*gridSize));
+            graphics.rectangle(uCount*gridSize, (get_height()-(curModeRep*gridSize)), gridSize, (curModeRep*gridSize));
 
             uCount++;
+        }
+
+        final mid:Int = Math.round(UserStatics.data.length/2);
+        var numbers = DataUtil.getOrderedData(UserStatics.data);
+
+        final medianPoint = UserStatics.orderedModes.indexOf(numbers[mid-1]);
+        final result:Float = numbers.length % 2 == 0 ? ((gridSize*medianPoint) + (gridSize*0.5)) : ((gridSize*medianPoint) + gridSize);
+        graphics.strokeStyle(UserStatics.userColors[1], size);
+        graphics.moveTo(result, get_height());
+        graphics.lineTo(result, 0);
+
+        for(i in 0...UserStatics.orderedModes.length)
+        {
+            final curValue = UserStatics.orderedModes[i];
+            var nextValue:Float = 10;
+            if(i < UserStatics.orderedModes.length-1)
+                nextValue = UserStatics.orderedModes[i+1];
+            
+            if(curValue < DataUtil.mean(numbers) && DataUtil.mean(numbers) < nextValue)
+            {
+                graphics.strokeStyle(UserStatics.userColors[2], size);
+                graphics.moveTo(((i+1)*gridSize)+(gridSize*0.5), get_height());
+                graphics.lineTo(((i+1)*gridSize)+(gridSize*0.5), 0);
+                break;
+            }
         }
     }
     private function drawGrid(graphics:ComponentGraphics, cx:Float, cy:Float, gridSize:Float) {

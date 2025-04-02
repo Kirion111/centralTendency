@@ -35,9 +35,25 @@ class DataUtil{
 
         return UserStatics.data.length < 1;
     }
+    public static function fastCheckData():Bool{return UserStatics.data.length < 1;}
+
+    public static function getOrderedData(numbers:Array<Float>):Array<Float>
+    {
+        numbers.sort(function (a, b)
+        {
+            if (a < b)
+                return -1;
+            else if (a > b)
+                return 1;
+            else
+                return 0;
+        });
+        return numbers;
+    }
 
     public static function mode(numbers:Array<Float>):Array<Float> {
         UserStatics.userModes = new Map();
+        UserStatics.orderedModes = [];
         var modes:Array<Float> = [];
         for(num in numbers)
         {
@@ -50,6 +66,8 @@ class DataUtil{
         }
         for(number=>instances in UserStatics.userModes)
         {
+            //DataUtil.getOrderedData();
+            UserStatics.orderedModes.push(Std.parseFloat(number));
             if(modes.length <= 0)
             {
                 modes.push(Std.parseFloat(number));
@@ -70,10 +88,12 @@ class DataUtil{
                 }
             }
         }
+        UserStatics.orderedModes = getOrderedData(UserStatics.orderedModes);
         return modes;
     }
     public static function median(numbers:Array<Float>):Float {
         final mid:Int = Math.round(numbers.length/2);
+        numbers = getOrderedData(numbers);
         var result:Float = numbers.length % 2 == 0 ? (numbers[mid-1]+numbers[mid])/2 : numbers[mid-1];
         
         return result;
